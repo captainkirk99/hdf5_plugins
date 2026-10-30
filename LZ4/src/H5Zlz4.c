@@ -55,8 +55,8 @@
 #include "H5PLextern.h"
 #include "lz4.h"
 
-size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
-                             size_t nbytes, size_t *buf_size, void **buf);
+size_t H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes,
+                      size_t *buf_size, void **buf);
 
 #define H5Z_FILTER_LZ4 32004
 
@@ -172,7 +172,7 @@ H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts, const unsigned int cd_value
         size_t    maxDestSize;
         char     *rpos;  /* pointer to current read position */
         char     *roBuf; /* pointer to current write position */
-	int      acceleration = 1;
+        int       acceleration = 1;
 
         if (nbytes > INT32_MAX) {
             /* can only compress chunks up to 2GB */
@@ -211,8 +211,8 @@ H5Z_filter_lz4(unsigned int flags, size_t cd_nelmts, const unsigned int cd_value
             if (nbytes - origWritten < blockSize) /* the last block may be < blockSize */
                 blockSize = nbytes - origWritten;
 
-            compBlockSize = LZ4_compress_fast(
-                rpos, roBuf + 4, blockSize, LZ4_compressBound(blockSize), acceleration); /// reserve space for compBlockSize
+            compBlockSize = LZ4_compress_fast(rpos, roBuf + 4, blockSize, LZ4_compressBound(blockSize),
+                                              acceleration); /// reserve space for compBlockSize
             if (!compBlockSize)
                 goto error;
             if (compBlockSize >= blockSize) /* compression did not save any space, do a memcpy instead */
