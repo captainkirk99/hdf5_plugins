@@ -156,7 +156,7 @@ H5Z_filter_jpeg(unsigned int flags, size_t cd_nelmts, const unsigned int cd_valu
         int                           err       = 0;
         unsigned char                *output    = NULL;
 
-        /* printf("****   decompressing nbytes: %ld\n", nbytes); */
+        printf("****   decompressing nbytes: %ld\n", nbytes);
         /* allocate and initialize JPEG decompression object */
 
         /* We set up the normal JPEG error routines, then override error_exit. */
@@ -167,6 +167,7 @@ H5Z_filter_jpeg(unsigned int flags, size_t cd_nelmts, const unsigned int cd_valu
             /* If we get here, the JPEG code has signaled an error.
              * We need to clean up the JPEG object and return.
              */
+	    printf("****   jpeg error!\n");	    
             jpeg_destroy_decompress(&jpegInfo);
             PUSH_ERR("jpeg_h5_filter", H5E_CALLBACK, "Could not initialize JPEG decompression object.");
             goto failed;
@@ -185,6 +186,8 @@ H5Z_filter_jpeg(unsigned int flags, size_t cd_nelmts, const unsigned int cd_valu
         /* Start decompressor */
         jpeg_start_decompress(&jpegInfo);
 
+	printf("elem_size %ld jpegInfo.output_height %d jpegInfo.output_width %d jpegInfo.output_components %d\n",
+	       elem_size, jpegInfo.output_height, jpegInfo.output_width, jpegInfo.output_components);
         buf_size_out =
             elem_size * jpegInfo.output_height * jpegInfo.output_width * jpegInfo.output_components;
         out_buf = malloc(buf_size_out);
@@ -195,9 +198,9 @@ H5Z_filter_jpeg(unsigned int flags, size_t cd_nelmts, const unsigned int cd_valu
         output = out_buf;
 
         while (jpegInfo.output_scanline < jpegInfo.output_height) {
-	    /* printf("****   jpegInfo.output_scanline: %d\n", jpegInfo.output_scanline);	     */
-            unsigned char *row_pointer[1] = {output};
-
+	    printf("****   jpegInfo.output_scanline: %d\n", jpegInfo.output_scanline);
+            unsigned char *row_pointer[1];
+	    row_pointer[0] = output + jpegInfo.output_scanline * jpegInfo.output_width * jpegInfo.output_components;
             err = jpeg_read_scanlines(&jpegInfo, row_pointer, 1);
             if (err != 1) {
                 sprintf(msg, "Error decoding JPE with error code %d.", err);
